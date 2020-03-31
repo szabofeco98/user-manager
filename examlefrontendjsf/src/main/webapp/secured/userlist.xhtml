@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:head>
+    <title>User List</title>
+    <h:outputStylesheet name="primeicons/primeicons.css" library="primefaces" />
+    <h:outputStylesheet name="theme.css" library="primefaces-nova-dark" />
+</h:head>
+<h:body>
+    <h:form id="userList">
+    <p:dataTable var="user" value="#{userListBean.users}" editable="true">
+        <p:ajax event="rowEdit"  listener="#{userListBean.onUserEdit}" />
+
+        <p:column headerText="Id">
+            <p:cellEditor>
+                <f:facet name="output"><h:outputText value="#{user.username}" /></f:facet>
+                <f:facet name="input"><p:inputText value="#{user.username}" style="width:100%" label="Year"/></f:facet>
+            </p:cellEditor>
+        </p:column>
+        <p:column headerText="Id">
+            <p:cellEditor>
+                <f:facet name="output"><h:outputText value="#{user.password}" /></f:facet>
+                <f:facet name="input"><p:inputText value="#{user.password}" style="width:100%" label="Year"/></f:facet>
+            </p:cellEditor>
+        </p:column>
+
+
+        <p:column style="width:32px">
+            <p:rowEditor />
+        </p:column>
+        <p:column style="width:32px">
+           <p:commandButton style="width: 28px;"
+                            title="Törlés"
+                            icon="pi pi-trash"
+                            action="#{userListBean.deleteUser(user)}"
+                            update="userList"/>
+        </p:column>
+        <p:column style="width:32px">
+            <p:commandButton style="width: 28px;"
+                             title="Címek"
+                             icon="pi pi-home"
+                             action="#{userListBean.setUser(user)}"
+                             update="addressesFrom"
+                             onclick="PF('addresses').show()"/>
+        </p:column>
+    </p:dataTable>
+        <hr/>
+        <p:commandButton value="Felhasználó hozzá adás"
+                         action="#{registrationBean.show}"/>
+    </h:form>
+
+
+
+    <p:dialog header="Felhasználó hozzá adás" widgetVar="adduser" modal="true" height="300" width="400">
+        <h:form id="registration" >
+            <p:growl id="growl" showDetail="false" sticky="false" />
+
+            <h:panelGrid columns="1" cellpadding="5" styleClass="login">
+                    <p:inputText id="username"
+                                 required="true"
+                                 requiredMessage="Felhasználó név kitöltése kötelező"
+                                 label="username"
+                                 placeholder="Felhasználó név"
+                                 value="#{registrationBean.user.username}"/>
+                    <p:password id="password"
+                                 required="true"
+                                 requiredMessage="Jelszó Kitöltése kötelező"
+                                 label="username"
+                                 placeholder="Jelszó"
+                                 value="#{registrationBean.user.password}"/>
+
+                    <f:facet name="footer">
+                        <p:commandButton value="Cím hozzá adás"
+                                         onclick="PF('addAddress').show();" ajax="true" />
+                        <br/><br/>
+                        <p:commandButton value="Mentés"
+                                         styleClass="ui-priority-primary"
+                                         action="#{registrationBean.registration}"
+                                         update="registration"/>
+                    </f:facet>
+                </h:panelGrid>
+        </h:form>
+    </p:dialog >
+
+    <p:dialog  header="Cím hozzá adás" widgetVar="addAddress"  height="100" width="300">
+        <h:form id="addressForm">
+            <p:inputText id="address"
+                         required="true"
+                         requiredMessage="Felhasználó név kitöltése kötelező"
+                         label="username"
+                         placeholder="Cím"
+                         value="#{registrationBean.address.address}"/>
+            <br/>
+            <p:commandButton value="Mentés"
+                             onclick="PF('addAddress').hide()"
+                             ajax="true"
+                             styleClass="ui-priority-primary"
+                            action="#{registrationBean.addAddress}"/>
+        </h:form>
+    </p:dialog>
+
+    <p:dialog header="Címek" widgetVar="addresses" height="300" width="400" >
+        <h:form id="addressesFrom" widgetVar="addressesFrom">
+            <p:dataTable var="address" value="#{userListBean.user.addresses}" editable="true">
+                <p:ajax event="rowEdit"  listener="#{userListBean.onAddEdit}" />
+                <p:column headerText="Id">
+                    <p:cellEditor>
+                        <f:facet name="output"><h:outputText value="#{address.address}" /></f:facet>
+                        <f:facet name="input"><p:inputText value="#{address.address}" style="width:100%" label="Year"/></f:facet>
+                    </p:cellEditor>
+                </p:column>
+                <p:column style="width:32px">
+                    <p:rowEditor />
+                </p:column>
+                <p:column style="width:32px">
+                <p:commandButton style="width: 28px;"
+                                 title="Törlés"
+                                 icon="pi pi-trash"
+                                 action="#{userListBean.deleteAddress(address)}"
+                                 update="@form"/>
+            </p:column>
+            </p:dataTable>
+            <p:commandButton value="Cím hozzá adás"
+                             action="#{userListBean.addAddress}"
+                             update="@form"/>
+        </h:form>
+    </p:dialog>
+</h:body>
+
+</html>

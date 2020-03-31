@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui" xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:head>
+    <title>Login</title>
+    <link type="text/css" rel="stylesheet" href="./css/login.css"/>
+    <link type="text/css" rel="stylesheet" href="primefaces-nova-dark/theme.css" />
+
+</h:head>
+<h:body>
+    <h:form id="login" >
+        <div class="loginContainer">
+            <p:messages id="msgs" display="text" showIcon="false"
+                        style="text-align: center;font-weight: bold"/>
+
+        <h:panelGrid columns="1" cellpadding="5" styleClass="login">
+            <f:facet name="header">
+                <h1>Bejelentkezés</h1>
+            </f:facet>
+            <p:inputText id="username"
+                         required="true"
+                         requiredMessage="Felhasználó név kitöltése kötelező"
+                         label="username"
+                         detail=""
+                         placeholder="Felhasználó név"
+                         value="#{loginBean.user.username}"
+                         />
+
+            <p:password id="password"
+                        required="true"
+                        requiredMessage="Jelszó kitöltése kötelező"
+                        label="password"
+                        detail=""
+                        placeholder="Jelszó"
+                        value="#{loginBean.user.password}"
+                        />
+
+            <f:facet name="footer">
+                <p:commandButton value="Bejelentkezés"
+                                 action="#{loginBean.login}" update="login"/>
+            </f:facet>
+        </h:panelGrid>
+        </div>
+    </h:form>
+</h:body>
+</html>

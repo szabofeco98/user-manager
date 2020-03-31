@@ -1,0 +1,18 @@
+.login{
+    margin: auto;
+}
+.loginContainer{
+    width: 60%;
+    border: 1px solid black;
+    margin: auto;
+    margin-top: 12%;
+    padding: 1em;
+    background-color: white;
+}
+button{
+    width: 100%;
+}
+
+body{
+    background-color: whitesmoke;
+}
