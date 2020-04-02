@@ -5,6 +5,5 @@ import javax.ws.rs.core.Application;
 
 @ApplicationPath("/server")
 public class RestApp extends Application { {
-    System.out.println("*******************************************");
     }
 }

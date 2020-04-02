@@ -21,17 +21,15 @@ public class JwtFilter extends HttpFilter {
 
     @Override
     protected void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException, ServletException {
-        String url =  req.getRequestURL().toString();
+        String url = req.getRequestURL().toString();
         String endPoint = url.substring(url.lastIndexOf('/'));
 
-        if( !endPoint.equals("/login") && !endPoint.equals("/registration") && !endPoint.equals("/logout")){
-            System.out.println("Authorization: "+req.getHeader("Authorization"));
-
-            String token =req.getHeader("Authorization");
-            if(!jwtTokenProvider.validateToken(token)){
+        if (!endPoint.equals("/login")) {
+            String token = req.getHeader("Authorization");
+            if (!jwtTokenProvider.validateToken(token)) {
                 res.sendError(403);
             }
         }
-         super.doFilter(req, res, chain);
+        super.doFilter(req, res, chain);
     }
 }

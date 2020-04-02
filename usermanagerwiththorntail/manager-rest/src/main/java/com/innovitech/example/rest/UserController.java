@@ -31,6 +31,13 @@ public class UserController {
         return userService.registration(user);
     }
 
+    @GET
+    @Path("/getUserByUsername/{username}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public UserDTO getUserByUsername(@PathParam("username") String username) {
+        return userService.getUserByUsername(username);
+    }
+
     @PUT
     @Path("/update")
     @Produces(MediaType.APPLICATION_JSON)

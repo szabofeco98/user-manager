@@ -10,6 +10,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import javax.annotation.PostConstruct;
 import javax.enterprise.inject.Default;
 import javax.inject.Singleton;
+import javax.persistence.NoResultException;
 import java.util.Base64;
 import java.util.Date;
 
@@ -17,19 +18,17 @@ import java.util.Date;
 @Singleton
 public class JwtTokenProvider implements JwtTokenProviderService {
 
-    private String secretKey="secret";
-
-    private long validityInMilliseconds=3600000; // 1h
+    private String secretKey = "secret";
+    private long validityInMilliseconds = 3600000; // 1h
 
     @PostConstruct
     protected void init() {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
     }
 
-    public String createToken(String username, String role) {
+    public String createToken(String username) {
 
         Claims claims = Jwts.claims().setSubject(username);
-        claims.put("auth", role);
         Date now = new Date();
         Date validity = new Date(now.getTime() + validityInMilliseconds);
 
@@ -41,19 +40,11 @@ public class JwtTokenProvider implements JwtTokenProviderService {
                 .compact();
     }
 
-    public String getRole(String token){
-        return (String) Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().get("auth");
-    }
-
-    public String getUsername(String token) {
-        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
-    }
-
     public boolean validateToken(String token) {
         try {
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
             return true;
-        } catch (JwtException | IllegalArgumentException e) {
+        } catch (JwtException | IllegalArgumentException | NoResultException e) {
             return false;
         }
     }

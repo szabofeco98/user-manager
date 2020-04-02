@@ -10,5 +10,13 @@ import lombok.ToString;
 public class AddressDTO {
     private Long id;
 
-    private String address;
+    private String street;
+
+    private Integer postalCode;
+
+    private Integer houseNumber;
+
+    private String city;
+
+    private UserDTO user;
 }

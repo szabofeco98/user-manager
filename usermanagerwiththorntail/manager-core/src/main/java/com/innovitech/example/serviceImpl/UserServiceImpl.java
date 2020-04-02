@@ -1,18 +1,20 @@
 package com.innovitech.example.serviceImpl;
 
 import com.innovitech.example.database.entity.User;
+import com.innovitech.example.database.repository.AddressDAO;
 import com.innovitech.example.database.repository.UserDAO;
 import com.innovitech.example.domain.UserDTO;
 import com.innovitech.example.services.UserService;
-import org.hibernate.exception.ConstraintViolationException;
+import com.innovitech.example.validator.Validator;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.modelmapper.ModelMapper;
 
 import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.NoResultException;
-import javax.persistence.PersistenceException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Default
 @Singleton
@@ -24,14 +26,17 @@ public class UserServiceImpl implements UserService {
     @Inject
     private JwtTokenProvider jwtTokenProvider;
 
+    @Inject
+    private AddressDAO addressDAO;
+
     private ModelMapper modelMapper = new ModelMapper();
 
     @Override
     public String login(UserDTO userDTO) {
         try {
             User user = userDAO.findByUsername(userDTO.getUsername());
-            if (user.getPassword().equals(userDTO.getPassword())) {
-                return jwtTokenProvider.createToken(user.getUsername(), "role");
+            if (user.getPassword().equals(DigestUtils.sha256Hex(userDTO.getPassword()))) {
+                return jwtTokenProvider.createToken(user.getUsername());
             } else {
                 return "wrong password";
             }
@@ -42,60 +47,58 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List getAll() {
-        return userDAO.findAll();
+        return userDAO.findAll().stream()
+                .map(x -> modelMapper.map(x, UserDTO.class))
+                .collect(Collectors.toList());
     }
 
     @Override
     public String registration(UserDTO userDTO) {
-        if (requiredValidator(userDTO.getPassword(), userDTO.getUsername())) {
-            try {
-                User user = modelMapper.map(userDTO, User.class);
-                userDAO.persist(user);
-                return "success";
-            } catch (Exception e) {
-                if (e.getCause().getCause() != null) {
-                    if(e.getCause().getCause().getClass().equals(ConstraintViolationException.class)){
-                        return "unique exception";
-                    }
-                }
-                return "fatal error";
-            }
+        if (!Validator.requiredValidator(userDTO.getPassword(), userDTO.getUsername())) {
+            return "every field required";
         }
-        return "every field required";
+        try {
+            User user = modelMapper.map(userDTO, User.class);
+            user.setPassword(DigestUtils.sha256Hex(user.getPassword()));
+            userDAO.persist(user);
+            return "success";
+        } catch (Exception e) {
+            return Validator.exceptionHandler(e);
+        }
     }
 
     @Override
     public String update(UserDTO userDTO) {
-        if (requiredValidator(userDTO.getPassword(), userDTO.getUsername())) {
-            try {
-                User user = modelMapper.map(userDTO, User.class);
-                userDAO.update(user);
-                return "success";
-            } catch (Exception e) {
-                if (e.getCause().getCause() != null) {
-                    if(e.getCause().getCause().getClass().equals(ConstraintViolationException.class)){
-                        return "unique exception";
-                    }
-                }
-                return "fatal error";
-            }
+        if (!Validator.requiredValidator(userDTO.getPassword(), userDTO.getUsername())) {
+            return "every field required";
         }
-        return "every field required";
+        try {
+            User user = modelMapper.map(userDTO, User.class);
+            if (!userDAO.find(user.getId()).getPassword().equals(user.getPassword())) {
+                user.setPassword(DigestUtils.sha256Hex(user.getPassword()));
+            }
+            userDAO.update(user);
+            return "success";
+
+        } catch (Exception e) {
+            return Validator.exceptionHandler(e);
+        }
     }
 
     @Override
     public String delete(UserDTO userDTO) {
-        User user = modelMapper.map(userDTO, User.class);
+        User user = userDAO.find(userDTO.getId());
+        addressDAO.removeByUser(user);
         userDAO.remove(user);
         return "ok";
     }
 
-    private boolean requiredValidator(String... requiredStrings) {
-        for (String s : requiredStrings) {
-            if (s == null) {
-                return false;
-            }
+    @Override
+    public UserDTO getUserByUsername(String username) {
+        try {
+            return modelMapper.map(userDAO.findByUsername(username), UserDTO.class);
+        } catch (NoResultException e) {
+            return null;
         }
-        return true;
     }
 }
