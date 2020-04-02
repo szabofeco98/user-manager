@@ -17,9 +17,7 @@ public class UserController {
     @POST
     @Path("/login")
     @Produces(MediaType.APPLICATION_JSON)
-    public String response(UserDTO user) {
-        System.out.println(user);
-        System.out.println(userService.login(user));
+    public String login(UserDTO user) {
         return userService.login(user);
     }
 
@@ -27,7 +25,6 @@ public class UserController {
     @Path("/registration")
     @Produces(MediaType.APPLICATION_JSON)
     public String registration(UserDTO user) {
-        System.out.println(user);
         return userService.registration(user);
     }
 
