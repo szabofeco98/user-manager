@@ -49,7 +49,7 @@ public class LoginBean {
                 FacesContext.getCurrentInstance().getExternalContext().getSessionMap()
                         .put("token", response);
                 FacesContext.getCurrentInstance()
-                        .getExternalContext().redirect("/secured/userlist.jsf");
+                        .getExternalContext().redirect("userlist.jsf");
                 break;
             }
         }

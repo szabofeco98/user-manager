@@ -8,7 +8,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode(exclude = "id")
+@EqualsAndHashCode(of = "id")
 public class User {
     private Long id;
 

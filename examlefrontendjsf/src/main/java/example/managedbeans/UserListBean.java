@@ -32,8 +32,8 @@ public class UserListBean {
             newPass = "";
             users = RestClient.getAllUser();
         } catch (Exception e) {
-            e.printStackTrace();
-            FacesContext.getCurrentInstance().getExternalContext().redirect("/login.jsf");
+            FacesContext.getCurrentInstance().getExternalContext().redirect(
+                    "login.jsf");
         }
     }
 
@@ -59,7 +59,7 @@ public class UserListBean {
     @SneakyThrows
     public void logOut() {
         FacesContext.getCurrentInstance().getExternalContext().getSessionMap().remove("token");
-        FacesContext.getCurrentInstance().getExternalContext().redirect("/login.jsf");
+        FacesContext.getCurrentInstance().getExternalContext().redirect("login.jsf");
 
     }
 
