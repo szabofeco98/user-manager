@@ -24,31 +24,30 @@ public class LoginBean {
 
     @SneakyThrows
     public String login() {
-        System.out.println(user);
-        String response = RestClient.loginAndRegistrationHandler(user, "login");
-        switch (response){
+        String response = RestClient.loginHandler(user);
+        switch (response) {
             case "wrong username": {
                 FacesContext.getCurrentInstance()
                         .addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
                                 "Hiba! Rossz Felhasználó név", response));
                 break;
             }
-            case "wrong password":{
+            case "wrong password": {
                 FacesContext.getCurrentInstance()
                         .addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
                                 "Hiba! Rossz Jelszó", response));
                 break;
             }
-            case "http Error":{
+            case "http Error": {
                 FacesContext.getCurrentInstance()
                         .addMessage(null, new FacesMessage(FacesMessage.SEVERITY_FATAL,
                                 "Hiba! Szerver hiba", response));
                 break;
             }
-            default:{
+            default: {
 
                 FacesContext.getCurrentInstance().getExternalContext().getSessionMap()
-                        .put("token",response);
+                        .put("token", response);
                 FacesContext.getCurrentInstance()
                         .getExternalContext().redirect("/secured/userlist.jsf");
                 break;

@@ -11,23 +11,43 @@
     <h:outputStylesheet name="theme.css" library="primefaces-nova-dark" />
 </h:head>
 <h:body>
-    <h:form id="userList">
-    <p:dataTable var="user" value="#{userListBean.users}" editable="true">
-        <p:ajax event="rowEdit"  listener="#{userListBean.onUserEdit}" />
 
-        <p:column headerText="Id">
+    <h:form id="userList">
+        <p:commandButton value="Kijelentkezés" style="margin-left: 90%;margin-bottom: 20px"
+                         action="#{userListBean.logOut}"
+                         process="@this"
+        />
+        <p:growl id="userListMessage" showDetail="false" sticky="false" />
+        <p:dataTable var="user" value="#{userListBean.users}" editable="true">
+        <p:ajax event="rowEdit" update=":userList:userListMessage" listener="#{userListBean.onUserEdit}" />
+
+        <p:column headerText="Felhasználó név">
             <p:cellEditor>
                 <f:facet name="output"><h:outputText value="#{user.username}" /></f:facet>
-                <f:facet name="input"><p:inputText value="#{user.username}" style="width:100%" label="Year"/></f:facet>
+                <f:facet name="input">
+                    <p:inputText
+                            required="true"
+                            requiredMessage="A Felhasználónév kitöltése kötelező"
+                            value="#{user.username}"
+                            style="width:94%" label="Year"/>
+                </f:facet>
             </p:cellEditor>
         </p:column>
-        <p:column headerText="Id">
+        <p:column headerText="Jelszó">
             <p:cellEditor>
-                <f:facet name="output"><h:outputText value="#{user.password}" /></f:facet>
-                <f:facet name="input"><p:inputText value="#{user.password}" style="width:100%" label="Year"/></f:facet>
+                <f:facet name="output"><h:outputText value="" /></f:facet>
+                <f:facet name="input">
+                    <p:inputText type="password"
+                                 value="#{userListBean.newPass}" style="width:100%"/>
+                </f:facet>
             </p:cellEditor>
         </p:column>
-
+        <p:column headerText="Név">
+            <p:cellEditor>
+                <f:facet name="output"><h:outputText value="#{user.name}" /></f:facet>
+                <f:facet name="input"><p:inputText value="#{user.name}" style="width:100%" label="Year"/></f:facet>
+            </p:cellEditor>
+        </p:column>
 
         <p:column style="width:32px">
             <p:rowEditor />
@@ -43,7 +63,7 @@
             <p:commandButton style="width: 28px;"
                              title="Címek"
                              icon="pi pi-home"
-                             action="#{userListBean.setUser(user)}"
+                             action="#{addressBean.setUser(user)}"
                              update="addressesFrom"
                              onclick="PF('addresses').show()"/>
         </p:column>
@@ -57,7 +77,7 @@
 
     <p:dialog header="Felhasználó hozzá adás" widgetVar="adduser" modal="true" height="300" width="400">
         <h:form id="registration" >
-            <p:growl id="growl" showDetail="false" sticky="false" />
+            <p:growl id="usermessage" showDetail="false" sticky="false" />
 
             <h:panelGrid columns="1" cellpadding="5" styleClass="login">
                     <p:inputText id="username"
@@ -66,6 +86,11 @@
                                  label="username"
                                  placeholder="Felhasználó név"
                                  value="#{registrationBean.user.username}"/>
+                <p:inputText id="name"
+                             required="true"
+                             requiredMessage="Felhasználó név kitöltése kötelező"
+                             placeholder="Név"
+                             value="#{registrationBean.user.name}"/>
                     <p:password id="password"
                                  required="true"
                                  requiredMessage="Jelszó Kitöltése kötelező"
@@ -75,7 +100,9 @@
 
                     <f:facet name="footer">
                         <p:commandButton value="Cím hozzá adás"
-                                         onclick="PF('addAddress').show();" ajax="true" />
+                                         onclick="PF('addAddress').show();"
+                                         update=":addressForm"
+                                         />
                         <br/><br/>
                         <p:commandButton value="Mentés"
                                          styleClass="ui-priority-primary"
@@ -86,31 +113,97 @@
         </h:form>
     </p:dialog >
 
-    <p:dialog  header="Cím hozzá adás" widgetVar="addAddress"  height="100" width="300">
+    <p:dialog  header="Cím hozzá adás" widgetVar="addAddress"  height="300" width="400">
         <h:form id="addressForm">
-            <p:inputText id="address"
+            <h:panelGrid columns="2" cellpadding="5">
+
+            <p:outputLabel value="Város:"/>
+            <p:inputText id="city"
                          required="true"
-                         requiredMessage="Felhasználó név kitöltése kötelező"
-                         label="username"
-                         placeholder="Cím"
-                         value="#{registrationBean.address.address}"/>
-            <br/>
+                         requiredMessage="Város megadadása kötelező"
+                         placeholder="Város"
+                         value="#{addressBean.address.city}"/>
+
+            <p:outputLabel value="Irányitó szám:"/>
+            <p:inputText id="postalCode"
+                         required="true"
+                         requiredMessage="Írányítószám megadása kötelező"
+                         placeholder="Írányítószám"
+                         converterMessage="Az irányítószám nem tartalmazhat betűt"
+                         value="#{addressBean.address.postalCode}"/>
+
+            <p:outputLabel value="Utca:"/>
+            <p:inputText id="street"
+                         required="true"
+                         requiredMessage="Utca megadása  kötelező"
+                         placeholder="Utca"
+                         value="#{addressBean.address.street}"/>
+
+            <p:outputLabel value="Házszám:"/>
+            <p:inputText id="houseNum"
+                         required="true"
+                         requiredMessage="Házszám megadása  kötelező"
+                         converterMessage="Az Házszám nem tartalmazhat betűt"
+                         placeholder="Házszám"
+                         autoUpdate="true"
+                         value="#{addressBean.address.houseNumber}"/>
+            <f:facet name="footer">
             <p:commandButton value="Mentés"
-                             onclick="PF('addAddress').hide()"
                              ajax="true"
                              styleClass="ui-priority-primary"
-                            action="#{registrationBean.addAddress}"/>
+                             update=":registration:usermessage"
+                             action="#{addressBean.addAddress}"/>
+            </f:facet>
+            </h:panelGrid>
         </h:form>
     </p:dialog>
 
-    <p:dialog header="Címek" widgetVar="addresses" height="300" width="400" >
+    <p:dialog header="Címek" widgetVar="addresses" height="400" width="600" modal="true" >
         <h:form id="addressesFrom" widgetVar="addressesFrom">
-            <p:dataTable var="address" value="#{userListBean.user.addresses}" editable="true">
-                <p:ajax event="rowEdit"  listener="#{userListBean.onAddEdit}" />
-                <p:column headerText="Id">
+            <p:growl id="addressmesage" showDetail="false" sticky="false" />
+
+            <p:dataTable var="address" id="addresstable" value="#{addressBean.addresses}" editable="true">
+                <p:ajax event="rowEdit"  listener="#{addressBean.onAddressEdit}"  update=":addressesFrom:addressmesage"/>
+                <p:column headerText="Város">
                     <p:cellEditor>
-                        <f:facet name="output"><h:outputText value="#{address.address}" /></f:facet>
-                        <f:facet name="input"><p:inputText value="#{address.address}" style="width:100%" label="Year"/></f:facet>
+                        <f:facet name="output"><h:outputText value="#{address.city}" /></f:facet>
+                        <f:facet name="input"><p:inputText
+                                required="true"
+                                requiredMessage="A város kitöltése kötelező"
+                                value="#{address.city}" style="width:100%" label="Year"/></f:facet>
+                    </p:cellEditor>
+                </p:column>
+                <p:column headerText="Irányítószám">
+                    <p:cellEditor>
+                        <f:facet name="output"><h:outputText value="#{address.postalCode}" /></f:facet>
+                        <f:facet name="input"><p:inputText
+                                converterMessage="Az irányítószám nem tartalmazhat betűt"
+                                required="true"
+                                requiredMessage="Az irányítószám kitöltése kötelező"
+                                value="#{address.postalCode}" style="width:100%" label="Year"/>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+                <p:column headerText="Utca">
+                    <p:cellEditor>
+                        <f:facet name="output"><h:outputText value="#{address.street}" /></f:facet>
+                        <f:facet name="input"><p:inputText
+                                value="#{address.street}"
+                                required="true"
+                                requiredMessage="Az utca kitöltése kötelező"
+                                style="width:100%" label="Year"/>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+                <p:column headerText="Házszám">
+                    <p:cellEditor>
+                        <f:facet name="output"><h:outputText value="#{address.houseNumber}" /></f:facet>
+                        <f:facet name="input"><p:inputText
+                                converterMessage="Az házszám nem tartalmazhat betűt"
+                                required="true"
+                                requiredMessage="A házszám kitöltése kötelező"
+                                value="#{address.houseNumber}" style="width:100%" label="Year"/>
+                        </f:facet>
                     </p:cellEditor>
                 </p:column>
                 <p:column style="width:32px">
@@ -120,15 +213,16 @@
                 <p:commandButton style="width: 28px;"
                                  title="Törlés"
                                  icon="pi pi-trash"
-                                 action="#{userListBean.deleteAddress(address)}"
+                                 action="#{addressBean.deleteAddress(address)}"
                                  update="@form"/>
             </p:column>
             </p:dataTable>
             <p:commandButton value="Cím hozzá adás"
-                             action="#{userListBean.addAddress}"
-                             update="@form"/>
+                             onclick="PF('addAddress').show()"
+                             update="@form :addressesFrom:addressmesage :addressForm"/>
         </h:form>
     </p:dialog>
+
 </h:body>
 
 </html>

@@ -10,44 +10,50 @@ import org.primefaces.PrimeFaces;
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.faces.bean.ManagedProperty;
+import javax.faces.bean.ViewScoped;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 @ManagedBean
 @Getter
 @Setter
-@SessionScoped
+@ViewScoped
 public class RegistrationBean {
     private User user;
 
-    private Address address;
+    private PrimeFaces current;
+
+    @ManagedProperty("#{addressBean}")
+    private AddressBean addressBean;
 
     @PostConstruct
-    private void init(){
-        user=new User();
-        user.setAddresses(new ArrayList<>());
-        address=new Address();
+    private void init() {
+        current = PrimeFaces.current();
+        user = new User();
     }
 
     public void registration() throws IOException {
-        String response = RestClient.loginAndRegistrationHandler(user,"registration");
-        switch (response){
-            case "success":{
+        String response = RestClient.registrationHandler(user);
+        switch (response) {
+            case "success": {
+                user = RestClient.getUserByUsername(user.getUsername());
+                for (Address address : addressBean.getAddresses()) {
+                    address.setUser(user);
+                    RestClient.addressPersist(address);
+                }
                 reload();
                 break;
             }
-            case "unique exception":{
+            case "unique exception": {
                 FacesContext.getCurrentInstance()
                         .addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
                                 "Hiba! A felhasználó név már foglalt", response));
                 break;
             }
-            case "fatal error":{
+            case "fatal error": {
                 FacesContext.getCurrentInstance()
                         .addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
                                 "Hiba! Sikertelen Regisztráció", response));
@@ -58,21 +64,12 @@ public class RegistrationBean {
         init();
     }
 
-    public void addAddress(){
-        user.getAddresses().add(address);
-        FacesContext.getCurrentInstance()
-                .addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO,
-                        "Cím hozzá adva!", address.toString()));
-        address=new Address();
-    }
-
-    public void show(){
-        init();
-        PrimeFaces current = PrimeFaces.current();
+    public void show() {
+        addressBean.setUser(null);
         current.executeScript("PF('adduser').show();");
     }
 
-    public void reload() throws IOException {
+    private void reload() throws IOException {
         ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
         ec.redirect(((HttpServletRequest) ec.getRequest()).getRequestURI());
     }

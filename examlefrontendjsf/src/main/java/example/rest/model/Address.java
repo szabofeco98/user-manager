@@ -12,5 +12,13 @@ import lombok.ToString;
 public class Address {
     private Long id;
 
-    private String address;
+    private String street;
+
+    private Integer postalCode;
+
+    private Integer houseNumber;
+
+    private String city;
+
+    private User user;
 }
