@@ -3,6 +3,7 @@ package com.innovitech.example.serviceImpl;
 import com.innovitech.example.database.entity.User;
 import com.innovitech.example.database.repository.AddressDAO;
 import com.innovitech.example.database.repository.UserDAO;
+import com.innovitech.example.domain.SearchUserQueryRequest;
 import com.innovitech.example.domain.UserDTO;
 import com.innovitech.example.services.UserService;
 import com.innovitech.example.validator.Validator;
@@ -46,8 +47,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List getAll() {
-        return userDAO.findAll().stream()
+    public List getAll(SearchUserQueryRequest request) {
+        return userDAO.getUsers(request).stream()
                 .map(x -> modelMapper.map(x, UserDTO.class))
                 .collect(Collectors.toList());
     }
@@ -100,5 +101,9 @@ public class UserServiceImpl implements UserService {
         } catch (NoResultException e) {
             return null;
         }
+    }
+
+    @Override public long getUserCount() {
+        return userDAO.getUserCount();
     }
 }

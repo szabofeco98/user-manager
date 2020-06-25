@@ -1,5 +1,6 @@
 package com.innovitech.example.rest;
 
+import com.innovitech.example.domain.SearchUserQueryRequest;
 import com.innovitech.example.domain.UserDTO;
 import com.innovitech.example.services.UserService;
 
@@ -45,8 +46,16 @@ public class UserController {
     @GET
     @Path("/getAll")
     @Produces(MediaType.APPLICATION_JSON)
-    public List getAll() {
-        return userService.getAll();
+    public List getAll(
+            @QueryParam("limit") int limit,
+            @QueryParam("page") int page,
+            @QueryParam("sortableElem") String sortableElem,
+            @QueryParam("sortType") String sortType
+            ) {
+        SearchUserQueryRequest searchUserQueryRequest = SearchUserQueryRequest.builder()
+                .limit(limit).page(page).sortableElem(sortableElem).sortType(sortType).build();
+        System.out.println(searchUserQueryRequest);
+        return userService.getAll(searchUserQueryRequest);
     }
 
     @DELETE
@@ -54,5 +63,12 @@ public class UserController {
     @Produces(MediaType.APPLICATION_JSON)
     public String delete(UserDTO userDTO) {
         return userService.delete(userDTO);
+    }
+
+    @GET
+    @Path("/getUserCount")
+    @Produces(MediaType.APPLICATION_JSON)
+    public long getUserCount(){
+        return userService.getUserCount();
     }
 }
